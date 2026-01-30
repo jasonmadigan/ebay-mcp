@@ -36,6 +36,19 @@ export const tradingTools: ToolDefinition[] = [
     },
   },
   {
+    name: 'ebay_upload_picture',
+    description:
+      'Upload an external image URL to eBay\'s picture hosting service (EPS). Returns an eBay-hosted URL ' +
+      'that can be used with ebay_revise_item. Use this to convert external manufacturer images to ' +
+      'eBay-compatible URLs.\n\n' +
+      'Common site IDs: 205 (Ireland), 3 (UK), 0 (US), 77 (Germany)',
+    inputSchema: {
+      imageUrl: z.string().describe('External image URL to upload to eBay'),
+      pictureName: z.string().optional().describe('Optional name for the picture'),
+      siteId: z.coerce.number().optional().describe('eBay site ID (205=Ireland, 3=UK, 0=US, 77=Germany)'),
+    },
+  },
+  {
     name: 'ebay_get_item',
     description:
       'Get full details of a single listing including photos. Use this to retrieve existing photo URLs ' +

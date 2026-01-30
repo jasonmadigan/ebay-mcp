@@ -326,6 +326,7 @@ export class TradingApi {
   }): Promise<{
     itemId: string;
     title: string;
+    description?: string;
     pictureUrls: string[];
     price: { value: number; currency: string };
     quantity: number;
@@ -342,7 +343,9 @@ export class TradingApi {
       DetailLevel: 'ReturnAll',
     })) as Record<string, unknown>;
 
-    const item = response.Item as Record<string, unknown>;
+    // Item may be an array due to parser config
+    const rawItem = response.Item;
+    const item = (Array.isArray(rawItem) ? rawItem[0] : rawItem) as Record<string, unknown>;
     const pictureDetails = item?.PictureDetails as Record<string, unknown> | undefined;
     const sellingStatus = item?.SellingStatus as Record<string, unknown> | undefined;
     const currentPrice = sellingStatus?.CurrentPrice as Record<string, unknown> | undefined;
@@ -356,6 +359,7 @@ export class TradingApi {
     return {
       itemId: String(item?.ItemID || itemId),
       title: String(item?.Title || ''),
+      description: item?.Description ? String(item.Description) : undefined,
       pictureUrls,
       price: {
         value: Number(currentPrice?.['#text'] || currentPrice || 0),
@@ -363,6 +367,36 @@ export class TradingApi {
       },
       quantity: Number(item?.Quantity || 0),
       sku: item?.SKU ? String(item.SKU) : undefined,
+    };
+  }
+
+  async uploadPicture(options: {
+    imageUrl: string;
+    pictureName?: string;
+    siteId?: number;
+  }): Promise<{ fullUrl: string; baseUrl: string }> {
+    const { imageUrl, pictureName, siteId } = options;
+
+    if (siteId) {
+      this.config.siteId = siteId;
+    }
+
+    const requestBody: Record<string, unknown> = {
+      ExternalPictureURL: imageUrl,
+      PictureSet: 'Supersize',
+    };
+
+    if (pictureName) {
+      requestBody.PictureName = pictureName;
+    }
+
+    const response = (await this.call('UploadSiteHostedPictures', requestBody)) as Record<string, unknown>;
+
+    const siteHostedPictureDetails = response.SiteHostedPictureDetails as Record<string, unknown> | undefined;
+
+    return {
+      fullUrl: String(siteHostedPictureDetails?.FullURL || ''),
+      baseUrl: String(siteHostedPictureDetails?.BaseURL || ''),
     };
   }
 

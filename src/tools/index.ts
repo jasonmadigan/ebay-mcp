@@ -1878,6 +1878,13 @@ export async function executeTool(
         siteId: args.siteId as number | undefined,
       });
 
+    case 'ebay_upload_picture':
+      return await api.trading.uploadPicture({
+        imageUrl: args.imageUrl as string,
+        pictureName: args.pictureName as string | undefined,
+        siteId: args.siteId as number | undefined,
+      });
+
     case 'ebay_get_item':
       return await api.trading.getItem({
         itemId: args.itemId as string,
