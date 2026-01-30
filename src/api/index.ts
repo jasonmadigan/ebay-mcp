@@ -18,6 +18,7 @@ import { EDeliveryApi } from '@/api/other/edelivery.js';
 import { IdentityApi } from '@/api/other/identity.js';
 import { TranslationApi } from '@/api/other/translation.js';
 import { VeroApi } from '@/api/other/vero.js';
+import { TradingApi } from '@/api/trading/client.js';
 import type { EbayConfig } from '@/types/ebay.js';
 
 /**
@@ -46,6 +47,7 @@ export class EbaySellerApi {
   public translation: TranslationApi;
   public edelivery: EDeliveryApi;
   public developer: DeveloperApi;
+  public trading: TradingApi;
 
   constructor(config: EbayConfig) {
     this.client = new EbayApiClient(config);
@@ -70,6 +72,7 @@ export class EbaySellerApi {
     this.translation = new TranslationApi(this.client);
     this.edelivery = new EDeliveryApi(this.client);
     this.developer = new DeveloperApi(this.client);
+    this.trading = new TradingApi(this.client);
   }
 
   /**
@@ -135,3 +138,4 @@ export * from '@/api/other/identity.js';
 export * from '@/api/other/translation.js';
 export * from '@/api/other/vero.js';
 export * from '@/api/developer/developer.js';
+export * from '@/api/trading/client.js';

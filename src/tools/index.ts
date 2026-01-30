@@ -12,6 +12,7 @@ import {
   otherApiTools,
   taxonomyTools,
   tokenManagementTools,
+  tradingTools,
   type ToolDefinition,
 } from '@/tools/definitions/index.js';
 import { convertToTimestamp, validateTokenExpiry } from '@/utils/date-converter.js';
@@ -80,6 +81,7 @@ export function getToolDefinitions(): ToolDefinition[] {
     ...communicationTools,
     ...otherApiTools,
     ...developerTools,
+    ...tradingTools,
   ];
 }
 
@@ -1853,6 +1855,16 @@ export async function executeTool(
       );
     case 'ebay_get_signing_key':
       return await api.developer.getSigningKey(args.signingKeyId as string);
+
+    // Trading API
+    case 'ebay_get_my_ebay_selling':
+      return await api.trading.getMyEbaySelling({
+        includeActive: (args.includeActive as boolean) ?? true,
+        includeSold: (args.includeSold as boolean) ?? false,
+        includeUnsold: (args.includeUnsold as boolean) ?? false,
+        activeEntriesPerPage: (args.entriesPerPage as number) ?? 200,
+        siteId: args.siteId as number | undefined,
+      });
 
     default:
       throw new Error(`Unknown tool: ${toolName}`);
