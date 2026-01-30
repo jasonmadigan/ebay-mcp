@@ -321,6 +321,7 @@ The server provides **387 tools** with **100% API coverage** organized into the 
 - **Metadata & Taxonomy** - Categories, item aspects, policies
 - **Developer Tools** - Rate limits, signing keys, client registration
 - **Token Management** - OAuth URL generation, token management
+- **Trading API** - Legacy API for listing management without business policies
 
 **Example Tools:**
 
@@ -329,6 +330,9 @@ The server provides **387 tools** with **100% API coverage** organized into the 
 - `ebay_create_offer` - Create new listing offer
 - `ebay_get_campaigns` - Get marketing campaigns
 - `ebay_get_oauth_url` - Generate OAuth authorization URL
+- `ebay_get_my_ebay_selling` - List all active/sold/unsold listings (Trading API)
+- `ebay_revise_item` - Edit listing price, title, quantity, description (Trading API)
+- `ebay_end_item` - End a listing early (Trading API)
 
 For the complete tool list, see [src/tools/definitions/](src/tools/definitions/).
 
@@ -375,6 +379,22 @@ Here are some common tasks you can accomplish with the eBay MCP server:
 **Assistant:** Combines `ebay_get_inventory_items`, filters by category, and uses `ebay_update_offer` to apply bulk pricing changes.
 
 **Result:** All matching items updated with new pricing.
+
+### Managing Listings (Trading API)
+
+**User:** "Show me all my active eBay listings"
+
+**Assistant:** Uses `ebay_get_my_ebay_selling` to retrieve all active, sold, and unsold listings.
+
+**Result:** Complete list of listings with titles, prices, quantities, and item IDs.
+
+**User:** "Lower the price of item 157641556738 to 50 euros"
+
+**Assistant:** Uses `ebay_revise_item` with the item ID and new price.
+
+**Result:** Listing price updated immediately.
+
+**Note:** The Trading API tools work with any listing type (auctions, fixed price) and don't require SKUs or business policies - ideal for sellers who created listings through the eBay website.
 
 ## Development
 

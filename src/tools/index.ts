@@ -1866,6 +1866,31 @@ export async function executeTool(
         siteId: args.siteId as number | undefined,
       });
 
+    case 'ebay_revise_item':
+      return await api.trading.reviseFixedPriceItem({
+        itemId: args.itemId as string,
+        title: args.title as string | undefined,
+        description: args.description as string | undefined,
+        price: args.price as number | undefined,
+        quantity: args.quantity as number | undefined,
+        sku: args.sku as string | undefined,
+        pictureUrls: args.pictureUrls as string[] | undefined,
+        siteId: args.siteId as number | undefined,
+      });
+
+    case 'ebay_get_item':
+      return await api.trading.getItem({
+        itemId: args.itemId as string,
+        siteId: args.siteId as number | undefined,
+      });
+
+    case 'ebay_end_item':
+      return await api.trading.endItem({
+        itemId: args.itemId as string,
+        reason: args.reason as 'NotAvailable' | 'Incorrect' | 'LostOrBroken' | 'OtherListingError' | 'SellToHighBidder',
+        siteId: args.siteId as number | undefined,
+      });
+
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }

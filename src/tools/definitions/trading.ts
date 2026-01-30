@@ -17,4 +17,46 @@ export const tradingTools: ToolDefinition[] = [
       siteId: z.coerce.number().optional().describe('eBay site ID (205=Ireland, 3=UK, 0=US, 77=Germany)'),
     },
   },
+  {
+    name: 'ebay_revise_item',
+    description:
+      'Revise/edit a fixed price listing. Can update title, description, price, quantity, SKU, or photos. ' +
+      'Only include fields you want to change. For photos, provide an array of image URLs - these will ' +
+      'REPLACE all existing photos, so include your original photo URL first if you want to keep it.\n\n' +
+      'Common site IDs: 205 (Ireland), 3 (UK), 0 (US), 77 (Germany)',
+    inputSchema: {
+      itemId: z.string().describe('The eBay item ID to revise'),
+      title: z.string().optional().describe('New title (max 80 chars)'),
+      description: z.string().optional().describe('New HTML description'),
+      price: z.coerce.number().optional().describe('New price'),
+      quantity: z.coerce.number().optional().describe('New quantity'),
+      sku: z.string().optional().describe('New SKU/custom label'),
+      pictureUrls: z.array(z.string()).optional().describe('Array of image URLs (replaces all existing photos)'),
+      siteId: z.coerce.number().optional().describe('eBay site ID (205=Ireland, 3=UK, 0=US, 77=Germany)'),
+    },
+  },
+  {
+    name: 'ebay_get_item',
+    description:
+      'Get full details of a single listing including photos. Use this to retrieve existing photo URLs ' +
+      'before revising a listing with new photos.\n\n' +
+      'Common site IDs: 205 (Ireland), 3 (UK), 0 (US), 77 (Germany)',
+    inputSchema: {
+      itemId: z.string().describe('The eBay item ID'),
+      siteId: z.coerce.number().optional().describe('eBay site ID (205=Ireland, 3=UK, 0=US, 77=Germany)'),
+    },
+  },
+  {
+    name: 'ebay_end_item',
+    description:
+      'End a listing early. Reasons: NotAvailable (sold elsewhere), Incorrect (listing error), ' +
+      'LostOrBroken (item damaged), OtherListingError, SellToHighBidder (auction only).\n\n' +
+      'Common site IDs: 205 (Ireland), 3 (UK), 0 (US), 77 (Germany)',
+    inputSchema: {
+      itemId: z.string().describe('The eBay item ID to end'),
+      reason: z.enum(['NotAvailable', 'Incorrect', 'LostOrBroken', 'OtherListingError', 'SellToHighBidder'])
+        .describe('Reason for ending the listing'),
+      siteId: z.coerce.number().optional().describe('eBay site ID (205=Ireland, 3=UK, 0=US, 77=Germany)'),
+    },
+  },
 ];

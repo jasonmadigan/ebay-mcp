@@ -79,18 +79,18 @@ export class TradingApi {
   private async call(callName: string, requestBody: Record<string, unknown>): Promise<unknown> {
     const token = await this.restClient.getOAuthClient().getAccessToken();
 
-    const xmlRequest = this.builder.build({
-      [callName + 'Request']: {
-        '@_xmlns': 'urn:ebay:apis:eBLBaseComponents',
-        RequesterCredentials: {
-          eBayAuthToken: token,
+    // use IAF-TOKEN header for OAuth, don't include RequesterCredentials in body
+    const xmlRequest =
+      '<?xml version="1.0" encoding="utf-8"?>' +
+      this.builder.build({
+        [callName + 'Request']: {
+          '@_xmlns': 'urn:ebay:apis:eBLBaseComponents',
+          ...requestBody,
         },
-        ...requestBody,
-      },
-    });
+      });
 
     const headers = {
-      'Content-Type': 'text/xml',
+      'Content-Type': 'text/xml;charset=UTF-8',
       'X-EBAY-API-CALL-NAME': callName,
       'X-EBAY-API-SITEID': String(this.config.siteId),
       'X-EBAY-API-COMPATIBILITY-LEVEL': TRADING_API_VERSION,
@@ -260,6 +260,133 @@ export class TradingApi {
     }
 
     return result;
+  }
+
+  async reviseFixedPriceItem(options: {
+    itemId: string;
+    title?: string;
+    description?: string;
+    price?: number;
+    quantity?: number;
+    sku?: string;
+    pictureUrls?: string[];
+    siteId?: number;
+  }): Promise<{ itemId: string; success: boolean; fees?: Record<string, unknown> }> {
+    const { itemId, title, description, price, quantity, sku, pictureUrls, siteId } = options;
+
+    if (siteId) {
+      this.config.siteId = siteId;
+    }
+
+    const item: Record<string, unknown> = {
+      ItemID: itemId,
+    };
+
+    if (title !== undefined) {
+      item.Title = title;
+    }
+
+    if (description !== undefined) {
+      item.Description = description;
+    }
+
+    if (price !== undefined) {
+      item.StartPrice = price;
+    }
+
+    if (quantity !== undefined) {
+      item.Quantity = quantity;
+    }
+
+    if (sku !== undefined) {
+      item.SKU = sku;
+    }
+
+    if (pictureUrls !== undefined && pictureUrls.length > 0) {
+      item.PictureDetails = {
+        PictureURL: pictureUrls,
+      };
+    }
+
+    const response = (await this.call('ReviseFixedPriceItem', { Item: item })) as Record<
+      string,
+      unknown
+    >;
+
+    return {
+      itemId: String(response.ItemID || itemId),
+      success: response.Ack === 'Success' || response.Ack === 'Warning',
+      fees: response.Fees as Record<string, unknown> | undefined,
+    };
+  }
+
+  async getItem(options: {
+    itemId: string;
+    siteId?: number;
+  }): Promise<{
+    itemId: string;
+    title: string;
+    pictureUrls: string[];
+    price: { value: number; currency: string };
+    quantity: number;
+    sku?: string;
+  }> {
+    const { itemId, siteId } = options;
+
+    if (siteId) {
+      this.config.siteId = siteId;
+    }
+
+    const response = (await this.call('GetItem', {
+      ItemID: itemId,
+      DetailLevel: 'ReturnAll',
+    })) as Record<string, unknown>;
+
+    const item = response.Item as Record<string, unknown>;
+    const pictureDetails = item?.PictureDetails as Record<string, unknown> | undefined;
+    const sellingStatus = item?.SellingStatus as Record<string, unknown> | undefined;
+    const currentPrice = sellingStatus?.CurrentPrice as Record<string, unknown> | undefined;
+
+    let pictureUrls: string[] = [];
+    if (pictureDetails?.PictureURL) {
+      const urls = pictureDetails.PictureURL;
+      pictureUrls = Array.isArray(urls) ? urls.map(String) : [String(urls)];
+    }
+
+    return {
+      itemId: String(item?.ItemID || itemId),
+      title: String(item?.Title || ''),
+      pictureUrls,
+      price: {
+        value: Number(currentPrice?.['#text'] || currentPrice || 0),
+        currency: String(currentPrice?.['@_currencyID'] || 'EUR'),
+      },
+      quantity: Number(item?.Quantity || 0),
+      sku: item?.SKU ? String(item.SKU) : undefined,
+    };
+  }
+
+  async endItem(options: {
+    itemId: string;
+    reason: 'NotAvailable' | 'Incorrect' | 'LostOrBroken' | 'OtherListingError' | 'SellToHighBidder';
+    siteId?: number;
+  }): Promise<{ itemId: string; endTime: string; success: boolean }> {
+    const { itemId, reason, siteId } = options;
+
+    if (siteId) {
+      this.config.siteId = siteId;
+    }
+
+    const response = (await this.call('EndItem', {
+      ItemID: itemId,
+      EndingReason: reason,
+    })) as Record<string, unknown>;
+
+    return {
+      itemId: String(response.ItemID || itemId),
+      endTime: String(response.EndTime || ''),
+      success: response.Ack === 'Success' || response.Ack === 'Warning',
+    };
   }
 }
 
