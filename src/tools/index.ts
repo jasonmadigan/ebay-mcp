@@ -1875,6 +1875,9 @@ export async function executeTool(
         quantity: args.quantity as number | undefined,
         sku: args.sku as string | undefined,
         pictureUrls: args.pictureUrls as string[] | undefined,
+        bestOfferEnabled: args.bestOfferEnabled as boolean | undefined,
+        bestOfferAutoAcceptPrice: args.bestOfferAutoAcceptPrice as number | undefined,
+        bestOfferAutoDeclinePrice: args.bestOfferAutoDeclinePrice as number | undefined,
         siteId: args.siteId as number | undefined,
       });
 

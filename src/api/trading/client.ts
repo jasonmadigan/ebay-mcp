@@ -270,9 +270,24 @@ export class TradingApi {
     quantity?: number;
     sku?: string;
     pictureUrls?: string[];
+    bestOfferEnabled?: boolean;
+    bestOfferAutoAcceptPrice?: number;
+    bestOfferAutoDeclinePrice?: number;
     siteId?: number;
   }): Promise<{ itemId: string; success: boolean; fees?: Record<string, unknown> }> {
-    const { itemId, title, description, price, quantity, sku, pictureUrls, siteId } = options;
+    const {
+      itemId,
+      title,
+      description,
+      price,
+      quantity,
+      sku,
+      pictureUrls,
+      bestOfferEnabled,
+      bestOfferAutoAcceptPrice,
+      bestOfferAutoDeclinePrice,
+      siteId,
+    } = options;
 
     if (siteId) {
       this.config.siteId = siteId;
@@ -306,6 +321,25 @@ export class TradingApi {
       item.PictureDetails = {
         PictureURL: pictureUrls,
       };
+    }
+
+    // best offer settings
+    if (bestOfferEnabled !== undefined || bestOfferAutoAcceptPrice !== undefined || bestOfferAutoDeclinePrice !== undefined) {
+      const bestOfferDetails: Record<string, unknown> = {};
+
+      if (bestOfferEnabled !== undefined) {
+        bestOfferDetails.BestOfferEnabled = bestOfferEnabled;
+      }
+
+      if (bestOfferAutoAcceptPrice !== undefined) {
+        bestOfferDetails.BestOfferAutoAcceptPrice = bestOfferAutoAcceptPrice;
+      }
+
+      if (bestOfferAutoDeclinePrice !== undefined) {
+        bestOfferDetails.MinimumBestOfferPrice = bestOfferAutoDeclinePrice;
+      }
+
+      item.BestOfferDetails = bestOfferDetails;
     }
 
     const response = (await this.call('ReviseFixedPriceItem', { Item: item })) as Record<

@@ -20,9 +20,10 @@ export const tradingTools: ToolDefinition[] = [
   {
     name: 'ebay_revise_item',
     description:
-      'Revise/edit a fixed price listing. Can update title, description, price, quantity, SKU, or photos. ' +
+      'Revise/edit a fixed price listing. Can update title, description, price, quantity, SKU, photos, or Best Offer settings. ' +
       'Only include fields you want to change. For photos, provide an array of image URLs - these will ' +
-      'REPLACE all existing photos, so include your original photo URL first if you want to keep it.\n\n' +
+      'REPLACE all existing photos, so include your original photo URL first if you want to keep it. ' +
+      'For Best Offer, set bestOfferEnabled=false to disable, or adjust auto-accept/auto-decline thresholds.\n\n' +
       'Common site IDs: 205 (Ireland), 3 (UK), 0 (US), 77 (Germany)',
     inputSchema: {
       itemId: z.string().describe('The eBay item ID to revise'),
@@ -32,6 +33,9 @@ export const tradingTools: ToolDefinition[] = [
       quantity: z.coerce.number().optional().describe('New quantity'),
       sku: z.string().optional().describe('New SKU/custom label'),
       pictureUrls: z.array(z.string()).optional().describe('Array of image URLs (replaces all existing photos)'),
+      bestOfferEnabled: z.coerce.boolean().optional().describe('Enable or disable Best Offer'),
+      bestOfferAutoAcceptPrice: z.coerce.number().optional().describe('Auto-accept offers at or above this price'),
+      bestOfferAutoDeclinePrice: z.coerce.number().optional().describe('Auto-decline offers below this price'),
       siteId: z.coerce.number().optional().describe('eBay site ID (205=Ireland, 3=UK, 0=US, 77=Germany)'),
     },
   },
