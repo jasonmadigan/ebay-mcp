@@ -8,15 +8,20 @@ import type {
 } from '@/types/ebay.js';
 import { LocaleEnum } from '@/types/ebay-enums.js';
 import { readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { authLogger } from '@/utils/logger.js';
+
+// resolve relative to the project root, not whatever cwd the host process has
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = join(__dirname, '..', '..');
 
 /**
  * Update .env file with new token values
  */
 function updateEnvFile(updates: { [key: string]: string }): void {
   try {
-    const envPath = join(process.cwd(), '.env');
+    const envPath = join(PROJECT_ROOT, '.env');
     let envContent = readFileSync(envPath, 'utf-8');
 
     // Update each key-value pair
